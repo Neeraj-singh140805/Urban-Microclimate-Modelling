@@ -1,0 +1,6 @@
+experiment,loss,fold,seed,epochs,predictions,pooled_r2,median_case_r2,median_nrmse,mean_delta_p95,mean_delta_max,idealized_pooled_r2,realistic_pooled_r2
+A4_FFT,FFT,0,0,100,97,0.7911,0.5839,0.3571,-0.4539,-1.7665,0.8356,0.7861
+A4_Sobel,Sobel,0,0,100,97,0.7868,0.5694,0.3671,-0.5084,-2.072,0.8305,0.7817
+A4_Mean_Consistency,Mean Consistency,0,0,100,97,0.7459,0.4642,0.4105,-0.6068,-2.3239,0.7358,0.7429
+A4_Tail_W1,Tail-W1,0,0,100,97,0.7413,0.4831,0.4075,-0.3703,-1.8683,0.7816,0.7358
+A4_Tail_W2,Tail-W2,0,0,100,97,0.5948,0.1583,0.521,-0.2571,-1.7897,0.6292,0.5876
