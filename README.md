@@ -90,7 +90,7 @@ The data is distributed by its authors under CC BY-NC 4.0. The simulation fields
 | [S12](pipeline/S12_architecture_search) | 2 | Residual, attention-gated and Fourier-operator networks at an equal budget; the loss library |
 | [S13](pipeline/S13_hybrid) | 2 | Error analysis, hybrids with the Phase 1 models, a ConvNeXt U-Net, and the final 200-epoch three-seed model |
 | [S14](pipeline/S14_dl_uncertainty) | 2 | Deep ensemble and MC dropout uncertainty, split-conformal intervals calibrated on held-out groups |
-| S15 | 2 | One-at-a-time ablations of the network and its inference time |
+| [S15](pipeline/S15_ablations_validation) | 2 | One-at-a-time ablations of the network and its inference time |
 | S16 | 2 | Phase 2 scoring of the frozen test set, run once after every choice is fixed |
 
 ## Phase 1 results
@@ -193,7 +193,7 @@ Real neighbourhoods hold 97 to 98% of the squared error, and 85 to 89% of that i
 
 ### Ablations
 
-Each ablation changes one setting of the network and is retrained and compared case by case with the unchanged network. Zero padding instead of wrap-around and training without the symmetry augmentation each cost about 0.03 in pooled $R^2$ over five folds, and a height-only input costs 0.044. A network trained on idealized arrays alone fails on real cities (realistic pooled $R^2$ of -0.035), and the score keeps rising with the number of training cities.
+Each ablation changes one setting of the network and is retrained and compared case by case with the unchanged network. Zero padding instead of wrap-around and training without the symmetry augmentation each cost about 0.03 in pooled $R^2$ over five folds, and a height-only input costs 0.044. A network trained on idealized arrays alone fails on real cities (realistic pooled $R^2$ of -0.035), and the score keeps rising with the number of training cities. Of the seven training losses tried on fold 0, plain L1 is best and only an added FFT term ties it. Details are in the [S15 summary](pipeline/S15_ablations_validation).
 
 <p align="center"><img src="reports/figures/phase2_ablations.png" width="860" alt="Five-fold ablations of the network"></p>
 
@@ -344,7 +344,8 @@ Urban-Microclimate-Modelling/
 │   ├── S11_unet_baseline/          periodic U-Net, trainer runs, tuning and results
 │   ├── S12_architecture_search/    alternative architectures and the loss library
 │   ├── S13_hybrid/                 error analysis, hybrids and the final model
-│   └── S14_dl_uncertainty/         ensemble and MC dropout uncertainty, conformal intervals
+│   ├── S14_dl_uncertainty/         ensemble and MC dropout uncertainty, conformal intervals
+│   └── S15_ablations_validation/   one-at-a-time ablations and inference time
 ├── reports/                        reports, slides and the combined paper (PDF), README figures, key references
 ├── results/                        experiment log (runs.csv; runs_v1.csv is the log before the metric columns were corrected); predictions and weights are not tracked
 ├── .github/workflows/              lint and tests on every pull request
