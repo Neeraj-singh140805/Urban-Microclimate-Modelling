@@ -1,0 +1,60 @@
+{
+  "epochs_run": 100,
+  "best_epoch": 99,
+  "best_val": 0.2782949194885217,
+  "val_metric": "rmse",
+  "minutes": 64.3,
+  "n_fit": 130,
+  "n_val": 26,
+  "steps_per_epoch": 70,
+  "device": "cuda",
+  "fold": 1,
+  "seed": 0,
+  "config_hash": "9e86a84fdcad",
+  "train_code": {
+    "git_sha": "4f8ff12",
+    "git_dirty": false
+  },
+  "predict_minutes": 0.7,
+  "inner_val_cases": [
+    "US35_d00",
+    "US35_d45",
+    "VA1111-HR-28_d00",
+    "VA1111-HR-28_d45",
+    "VA1111-HR-56_d00",
+    "VA1111-HR-56_d45",
+    "VA35-CL-28_d00",
+    "VA35-CL-28_d45",
+    "VA35-CL-56_d00",
+    "VA35-CL-56_d45",
+    "VA64-SM-28_d00",
+    "VA64-SM-28_d45",
+    "VA64-SM-56_d00",
+    "VA64-SM-56_d45",
+    "VS0625-CL-28_d00",
+    "VS0625-CL-28_d45",
+    "VS0625-CL-56_d00",
+    "VS0625-CL-56_d45",
+    "VS25-CL-28_d00",
+    "VS25-CL-28_d45",
+    "VS25-CL-56_d00",
+    "VS25-CL-56_d45",
+    "VS53-SM-28_d00",
+    "VS53-SM-28_d45",
+    "VS53-SM-56_d00",
+    "VS53-SM-56_d45"
+  ],
+  "inner_val_by_subset": {
+    "idealized": 26
+  },
+  "n_scored": 97,
+  "mirror_tta": true,
+  "native_upsample": "bilinear",
+  "infer_window": 0,
+  "infer_border": 64,
+  "infer_margin": 128,
+  "predict_code": {
+    "git_sha": "0e65759",
+    "git_dirty": false
+  }
+}

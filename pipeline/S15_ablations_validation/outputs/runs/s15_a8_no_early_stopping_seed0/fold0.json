@@ -1,0 +1,31 @@
+{
+  "epochs_run": 100,
+  "best_epoch": 99,
+  "best_val": null,
+  "val_metric": "rmse",
+  "minutes": 60.5,
+  "n_fit": 385,
+  "n_val": 0,
+  "steps_per_epoch": 70,
+  "device": "cuda",
+  "fold": 0,
+  "seed": 0,
+  "config_hash": "0c907c9d7b0e",
+  "train_code": {
+    "git_sha": "ee9683b",
+    "git_dirty": false
+  },
+  "predict_minutes": 0.4,
+  "inner_val_cases": [],
+  "inner_val_by_subset": {},
+  "n_scored": 97,
+  "mirror_tta": true,
+  "native_upsample": "bilinear",
+  "infer_window": 0,
+  "infer_border": 64,
+  "infer_margin": 128,
+  "predict_code": {
+    "git_sha": "0e65759",
+    "git_dirty": false
+  }
+}

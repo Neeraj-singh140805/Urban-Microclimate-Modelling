@@ -10,6 +10,7 @@ Public API
 UNet(in_ch, ...)                  : the S11 baseline
 ResUNet, AttnUNet, FNO            : S12a: residual, attention-gated and Fourier-operator candidates
 ConvNeXtUNet(in_ch, ...)          : S13: the same U-Net layout built from ConvNeXt blocks
+ChannelSelect(net, keep)          : S15: feeds a network only some of the input channels
 register(name)                    : decorator that adds an architecture to the registry
 build_model(name, in_ch, **kw)    : build any registered architecture
 """
@@ -41,11 +42,14 @@ def build_model(name: str, in_ch: int, **kwargs) -> nn.Module:
     return MODELS[name](in_ch=in_ch, **kwargs)
 
 
-def conv_block(cin: int, cout: int, groups: int = 8) -> nn.Sequential:
-    """Two 3x3 convolutions, each followed by GroupNorm and ReLU, with circular padding."""
+PADDINGS = ("circular", "zeros")  # "zeros" exists only for the S15 padding ablation
+
+
+def conv_block(cin: int, cout: int, groups: int = 8, padding: str = "circular") -> nn.Sequential:
+    """Two 3x3 convolutions, each followed by GroupNorm and ReLU, with circular padding by default."""
     return nn.Sequential(
-        nn.Conv2d(cin, cout, 3, padding=1, padding_mode="circular"), nn.GroupNorm(groups, cout), nn.ReLU(inplace=True),
-        nn.Conv2d(cout, cout, 3, padding=1, padding_mode="circular"), nn.GroupNorm(groups, cout), nn.ReLU(inplace=True),
+        nn.Conv2d(cin, cout, 3, padding=1, padding_mode=padding), nn.GroupNorm(groups, cout), nn.ReLU(inplace=True),
+        nn.Conv2d(cout, cout, 3, padding=1, padding_mode=padding), nn.GroupNorm(groups, cout), nn.ReLU(inplace=True),
     )
 
 
@@ -59,24 +63,36 @@ def upsample_periodic(x: torch.Tensor) -> torch.Tensor:
     return up[..., 2:-2, 2:-2]
 
 
+def upsample_plain(x: torch.Tensor) -> torch.Tensor:
+    """Ordinary bilinear 2x upsampling, which clamps at the edges (the non-periodic counterpart)."""
+    return F.interpolate(x, scale_factor=2, mode="bilinear", align_corners=False)
+
+
 @register("unet")
 class UNet(nn.Module):
-    """Periodic U-Net: 4 levels, GroupNorm, spatial dropout, and a softplus output so speeds stay positive."""
+    """Periodic U-Net: 4 levels, GroupNorm, spatial dropout, and a softplus output so speeds stay positive.
+
+    ``padding="zeros"`` swaps every circular padding for zero padding and the periodic upsampling for
+    ordinary bilinear upsampling, so the network no longer treats the domain as periodic (S15 ablation).
+    """
 
     def __init__(self, in_ch: int = 5, widths: tuple[int, ...] = (32, 64, 128, 256), bottleneck: int = 512,
-                 dropout: float = 0.1):
+                 dropout: float = 0.1, padding: str = "circular"):
         super().__init__()
+        if padding not in PADDINGS:
+            raise ValueError(f"padding must be one of {PADDINGS}, not {padding!r}")
+        self.upsample = upsample_periodic if padding == "circular" else upsample_plain
         self.down = nn.ModuleList()
         c = in_ch
         for w in widths:
-            self.down.append(conv_block(c, w))
+            self.down.append(conv_block(c, w, padding=padding))
             c = w
-        self.mid = conv_block(c, bottleneck)
+        self.mid = conv_block(c, bottleneck, padding=padding)
         self.up_conv, self.up_block = nn.ModuleList(), nn.ModuleList()
         c = bottleneck
         for w in reversed(widths):
-            self.up_conv.append(nn.Conv2d(c, w, 3, padding=1, padding_mode="circular"))
-            self.up_block.append(conv_block(2 * w, w))
+            self.up_conv.append(nn.Conv2d(c, w, 3, padding=1, padding_mode=padding))
+            self.up_block.append(conv_block(2 * w, w, padding=padding))
             c = w
         # spatial dropout drops whole feature maps; S14 keeps it on at prediction time for MC dropout
         self.drop = nn.Dropout2d(dropout)
@@ -98,7 +114,7 @@ class UNet(nn.Module):
         x = self.drop(self.mid(x))
         last = len(self.up_block) - 1
         for i, (conv, block, skip) in enumerate(zip(self.up_conv, self.up_block, reversed(skips))):
-            x = block(torch.cat([conv(upsample_periodic(x)), skip], dim=1))
+            x = block(torch.cat([conv(self.upsample(x)), skip], dim=1))
             if i < last:  # no dropout right before the output layer, which only maps features to speed
                 x = self.drop(x)
         return F.softplus(self.head(x))
@@ -447,3 +463,20 @@ class ConvNeXtUNet(nn.Module):
             if i < last:
                 x = self.drop(x)
         return F.softplus(self.head(x))
+
+
+class ChannelSelect(nn.Module):
+    """Feeds ``net`` only the input channels listed in ``keep`` (S15 input-channel ablation).
+
+    The data pipeline always builds all five channels; the selection happens here, so training and
+    whole-domain prediction need no other change.
+    """
+
+    def __init__(self, net: nn.Module, keep: list[int]):
+        super().__init__()
+        self.net = net
+        self.register_buffer("keep", torch.tensor(keep, dtype=torch.long), persistent=False)
+        self.multiple = getattr(net, "multiple", 16)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.net(x.index_select(1, self.keep))

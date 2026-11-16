@@ -1,0 +1,29 @@
+# S15 Transfer: train on idealized cases only; the realistic cases of fold 0 are then unseen in kind.
+# Everything else matches pipeline/S11_unet_baseline/configs/unet_tuned.yaml (100 epochs).
+# Run: uv run python -m urbanwind.dl.train --config pipeline/S15_ablations_validation/configs/t_idealized_only.yaml --seed 0 --folds 0
+exp_id: s15_t_idealized_only
+stage: S15
+out_dir: pipeline/S15_ablations_validation/outputs/runs
+split: grouped
+model:
+  name: unet
+  kwargs:
+    widths: [24, 48, 96, 192]
+    bottleneck: 384
+    dropout: 0.08
+loss: l1
+lr: 0.00036
+min_lr: 1.0e-05
+weight_decay: 6.5e-05
+batch: 16
+max_epochs: 100
+patience: 30
+inner_val_fraction: 0.15
+patch: 256
+border: 16
+mirror: true
+amp: true
+clip: 1.0
+mirror_tta: true
+native_upsample: bilinear
+train_subset: idealized

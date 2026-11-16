@@ -1,0 +1,62 @@
+{
+  "epochs_run": 100,
+  "best_epoch": 82,
+  "best_val": 0.6455456775923569,
+  "val_metric": "rmse",
+  "minutes": 65.9,
+  "n_fit": 146,
+  "n_val": 27,
+  "steps_per_epoch": 70,
+  "device": "cuda",
+  "fold": 3,
+  "seed": 0,
+  "config_hash": "2aeb3bde6021",
+  "train_code": {
+    "git_sha": "4f8ff12",
+    "git_dirty": false
+  },
+  "predict_minutes": 0.4,
+  "inner_val_cases": [
+    "AU-CAN-V3_d00",
+    "AU-Can-V1_d00",
+    "AU-Can-V2_d00",
+    "FR-PA-V1_d00",
+    "FR-PA-V2_d00",
+    "FR-PA-V2_d15",
+    "FR-PA-V2_d30",
+    "FR-PA-V2_d45",
+    "FR-PA-V2_d90",
+    "NP-NP-U1_d00",
+    "NP-NP-U2_d00",
+    "RU-MOS-U1_d00",
+    "RU-MOS-U1_d90",
+    "RU-MOS-V1_d00",
+    "RU-MOS-V1_d90",
+    "UA0625_d00",
+    "UA0625_d45",
+    "US0625_d00",
+    "US0625_d45",
+    "VS0625-SM-28_d00",
+    "VS0625-SM-28_d45",
+    "VS0625-SM-56_d00",
+    "VS0625-SM-56_d45",
+    "VS1111-HR-28_d00",
+    "VS1111-HR-28_d45",
+    "VS1111-HR-56_d00",
+    "VS1111-HR-56_d45"
+  ],
+  "inner_val_by_subset": {
+    "realistic": 15,
+    "idealized": 12
+  },
+  "n_scored": 96,
+  "mirror_tta": true,
+  "native_upsample": "bilinear",
+  "infer_window": 0,
+  "infer_border": 64,
+  "infer_margin": 128,
+  "predict_code": {
+    "git_sha": "0e65759",
+    "git_dirty": false
+  }
+}

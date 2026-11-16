@@ -50,13 +50,16 @@ from urbanwind.data import REPO_ROOT, load_case
 from urbanwind.dl.cache import CHANNELS, dev_cases, load_cached
 from urbanwind.dl.datasets import PatchDataset, predict_arrays, predict_canonical
 from urbanwind.dl.losses import LOSSES
-from urbanwind.dl.nets import build_model
+from urbanwind.dl.nets import ChannelSelect, build_model
 from urbanwind.evaluate import main as evaluate_main
 
 PREDS = REPO_ROOT / "results" / "preds"
 CHECKPOINTS = REPO_ROOT / "results" / "checkpoints"
 RANDOM_SPLIT_SEED = 42  # the random-split folds stay the same for every training seed
 NOT_HASHED = ("stage", "out_dir", "workers")  # settings that do not change what is trained
+# S15 ablation settings: left out of the hash while they keep these values, so runs made before
+# they existed keep their hashes
+ABLATION_DEFAULTS: dict[str, Any] = {"channels": None, "train_subset": None, "train_group_fraction": 1.0}
 
 DEFAULTS: dict[str, Any] = {
     "stage": "S11", "out_dir": "pipeline/S11_unet_baseline/outputs/runs", "split": "grouped",
@@ -67,6 +70,8 @@ DEFAULTS: dict[str, Any] = {
     "patch": 256, "border": 16, "mirror": True, "transpose45": True,
     "mirror_tta": True, "native_upsample": "bilinear", "infer_window": 0, "infer_border": 64, "infer_margin": 128,
     "workers": 0,
+    **ABLATION_DEFAULTS,  # channels: input channel names to keep; train_subset: "idealized" or "realistic";
+                          # train_group_fraction: share of each subset's training groups to keep
 }
 
 
@@ -79,7 +84,8 @@ def load_config(path: pathlib.Path) -> dict[str, Any]:
 
 
 def config_hash(cfg: dict) -> str:
-    kept = {k: v for k, v in cfg.items() if k not in NOT_HASHED}
+    kept = {k: v for k, v in cfg.items()
+            if k not in NOT_HASHED and not (k in ABLATION_DEFAULTS and v == ABLATION_DEFAULTS[k])}
     return hashlib.sha256(json.dumps(kept, sort_keys=True, default=str).encode()).hexdigest()[:12]
 
 
@@ -211,10 +217,43 @@ def ema_average(decay: float) -> Callable:
     return average
 
 
+def make_model(cfg: dict) -> torch.nn.Module:
+    """The configured network; with ``channels`` set, it sees only those input channels."""
+    if not cfg["channels"]:
+        return build_model(cfg["model"]["name"], len(CHANNELS), **cfg["model"]["kwargs"])
+    unknown = set(cfg["channels"]) - set(CHANNELS)
+    if unknown:
+        raise ValueError(f"unknown channels {sorted(unknown)}; the inputs are {CHANNELS}")
+    keep = [CHANNELS.index(name) for name in cfg["channels"]]
+    return ChannelSelect(build_model(cfg["model"]["name"], len(keep), **cfg["model"]["kwargs"]), keep)
+
+
+def training_cases(train: pd.DataFrame, cfg: dict, fold: int) -> pd.DataFrame:
+    """The outer-training cases a fold may use: one subset only, and/or a share of each subset's groups.
+
+    The groups kept depend on the fold only, like the inner split, so seeds differ in training alone.
+    """
+    if cfg["train_subset"]:
+        if cfg["train_subset"] not in ("idealized", "realistic"):
+            raise ValueError(f"train_subset must be idealized or realistic, not {cfg['train_subset']!r}")
+        train = train[train["subset"] == cfg["train_subset"]]
+    share = cfg["train_group_fraction"]
+    if share < 1.0:
+        if not 0.0 < share < 1.0:
+            raise ValueError(f"train_group_fraction must be in (0, 1], not {share}")
+        rng = np.random.default_rng(2000 + fold)
+        kept = []
+        for subset in sorted(train["subset"].unique()):
+            groups = sorted(train.loc[train["subset"] == subset, "split_group"].unique())
+            kept += list(rng.permutation(groups)[:max(1, round(share * len(groups)))])
+        train = train[train["split_group"].isin(kept)]
+    return train
+
+
 def _setup(cfg, seed: int, fit: list[str], device) -> dict:
     """Model, its EMA copy, optimiser, schedule, loss scaler and patch loader for one fold."""
     torch.manual_seed(seed)
-    model = build_model(cfg["model"]["name"], len(CHANNELS), **cfg["model"]["kwargs"]).to(device)
+    model = make_model(cfg).to(device)
     opt = torch.optim.AdamW(model.parameters(), lr=cfg["lr"], weight_decay=cfg["weight_decay"])
     data = PatchDataset(fit, patch=cfg["patch"], mirror=cfg["mirror"], seed=seed, border=cfg["border"],
                         length=cfg["steps_per_epoch"] * cfg["batch"], transpose45=cfg["transpose45"])
@@ -294,7 +333,7 @@ def write_predictions(model, cases: list[str], pred_dir: pathlib.Path, device, c
 
 
 def load_best(cfg, ckpt: pathlib.Path, device) -> torch.nn.Module:
-    model = build_model(cfg["model"]["name"], len(CHANNELS), **cfg["model"]["kwargs"]).to(device)
+    model = make_model(cfg).to(device)
     model.load_state_dict(torch.load(ckpt, map_location=device))
     return model
 
@@ -327,6 +366,7 @@ def run_fold(cfg, seed: int, fold: int, folds: pd.DataFrame, exp_id: str, device
         print(f"fold {fold}: already done, skipping ({summary})")
         return json.loads(summary.read_text())
     train, scored = folds[folds["fold"] != fold], folds.index[folds["fold"] == fold].tolist()
+    train = training_cases(train, cfg, fold)
     fit, val = inner_split(train, cfg["inner_val_fraction"], fold, by_group=cfg["split"] == "grouped",
                            cap=cfg["inner_group_cap"])
     print(f"fold {fold}: {len(fit)} training cases, {len(val)} inner-validation cases, {len(scored)} scored", flush=True)
