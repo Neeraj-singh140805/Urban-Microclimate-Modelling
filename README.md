@@ -149,6 +149,73 @@ uv run ruff check src pipeline && uv run pytest -q                 # lint and te
 - The frozen test set has already been scored (`pipeline/S09_phase1_evaluation`), and the scoring script refuses to run again.
 - Each stage README lists its inputs, outputs and results.
 
+## Using the trained model
+
+The final Phase 2 model is the periodic U-Net of `pipeline/S13_hybrid/configs/unet_tuned_e200.yaml`, trained for 200 epochs with three seeds on each of the five development folds. `urbanwind.dl.predict` runs it on any building layout. It needs only the building heights and the wind direction, never a simulation.
+
+### 1. Get the weights
+
+The trained weights (15 networks, 278 MB) are not in the repository; they are available from the authors on request. Place them as:
+
+```text
+results/checkpoints/s13_unet_tuned_e200_seed0/fold0.pt ... fold4.pt
+results/checkpoints/s13_unet_tuned_e200_seed1/fold0.pt ... fold4.pt
+results/checkpoints/s13_unet_tuned_e200_seed2/fold0.pt ... fold4.pt
+```
+
+Each file holds one network: one seed, trained on four of the five development folds.
+
+### 2. Prepare the input
+
+| Input | What it must be |
+| --- | --- |
+| Building heights | A 2D array in metres, 0 on open ground. Rows run along +y and columns along +x. File formats: `.npy`, `.csv`, `.txt`, or `.npz` with an array named `H`. |
+| Grid spacing | 1 m (the default) or 0.5 m (`--dx 0.5`). A 0.5 m raster is coarsened to 1 m for the network, and the prediction is returned on the 0.5 m grid. |
+| Wind direction | The direction the wind blows **towards**, in degrees from +x (columns) towards +y (rows): 0 blows towards +x, 90 towards +y. If +y is north and the wind comes **from** a compass bearing φ, use (270 − φ) mod 360; a westerly (φ = 270) gives 0. |
+| Periodic domain | The simulations repeat periodically, and so does the network: the right edge continues into the left and the top into the bottom. If the edges of your raster do not join up, cells within about 130 m of an edge (half the network's 260 m receptive field) see the far side of the domain, so trust the interior. |
+
+The whole raster is predicted in one pass, so the domain only has to fit in memory; the largest UrbanTALES domains have about a million cells.
+
+### 3. Run it
+
+```bash
+uv run python -m urbanwind.dl.predict --height layout.npy --wind-dir 30 --out wind.npz --png wind.png
+uv run python -m urbanwind.dl.predict --height layout.csv --dx 0.5 --wind-dir 225 --ustar 0.21 --out wind.npz
+uv run python -m urbanwind.dl.predict --case AU-Ade-V1_d00 --folds 1 --out wind.npz   # an UrbanTALES case from data/raw
+```
+
+Or from Python:
+
+```python
+import numpy as np
+from urbanwind.dl.predict import predict_layout
+
+H = np.load("layout.npy")                          # metres, 0 on open ground
+out = predict_layout(H, dx=1.0, wind_dir_deg=30)   # averages all 15 networks
+wind, spread = out["U"], out["spread"]             # U/u* and its spread, NaN on buildings
+```
+
+- By default all 15 networks are averaged; `--seeds` and `--folds` choose a subset. For a layout outside the dataset, every network is out of sample.
+- For an UrbanTALES development case, use only the networks of its own fold (`--folds k`, the case's fold in `data/splits.json`); the other folds were trained on it. Run this way, the command reproduces the reported out-of-fold predictions.
+- One network predicts a whole neighbourhood in a median of 0.10 s (idealized arrays) to 0.23 s (real neighbourhoods) on an Apple M3 Pro GPU. It also runs on a CPU, more slowly.
+
+### 4. Read the output
+
+`wind.npz` holds:
+
+| Array | Meaning |
+| --- | --- |
+| `U` | Time-averaged wind speed 1.75 m above the ground, divided by the friction velocity u*, on the input grid. NaN on buildings. |
+| `spread` | Standard deviation of `U` across the networks: high where they disagree, mostly along jets and around corners. |
+| `building` | True on building cells. |
+| `U_ms` | `U` in m/s, only when `--ustar` is given. |
+| `n_networks`, `wind_dir_deg`, `dx` | The settings used. |
+
+- **Units.** The simulations are driven by a pressure gradient, so the natural output is U/u*. In UrbanTALES u* lies between 0.2015 and 0.2106 m/s. Compare layouts in U/u* directly; for m/s, multiply by the u* of the forcing you assume (`--ustar`).
+- **Accuracy.** On the 482 development cases, each predicted by networks that never saw its city or layout family, the three-seed average reaches a pooled R² of 0.734 and a median per-case R² of 0.629 (idealized 0.747, realistic 0.573), with a mean absolute error of 0.450 u* (0.093 m/s). It underpredicts the fastest winds: the 95th percentile by about 0.4 u* on average. Errors are largest along the strongest jets and within 1 m of walls.
+- **Uncertainty.** `spread` is a relative guide to where the prediction is less certain. Turning it into calibrated 90% intervals needs a scale factor fitted on held-out folds; `pipeline/S14_dl_uncertainty` does this for the development cases.
+- **Limits.** The model inherits the simulations' assumptions: neutral, isothermal flow at one forcing, buildings as solid blocks without trees or terrain, and one height above the ground. The training layouts span plan-area densities of 0.06 to 0.64; layouts far outside that range are extrapolation.
+
 ## Repository structure
 
 ```text
