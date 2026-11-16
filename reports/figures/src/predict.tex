@@ -1,0 +1,18 @@
+\documentclass[border=14pt]{standalone}
+\input{style}
+\begin{document}
+\begin{tikzpicture}
+\def\dx{8.8}
+\node[data=6.0cm] (in) at (0,0) {\nt{Your layout}{height map in metres\\wind direction in degrees}};
+\node[ctrl=6.0cm] (fr) at (\dx,0) {\nt{Wind-aligned frame}{turn so the wind blows\\0$^\circ$ to 45$^\circ$ from $+x$}};
+\node[path=6.0cm] (ch) at (2*\dx,0) {\nt{Input channels}{height, mask, wall distance\\wind angle (cos, sin)}};
+\node[path=6.0cm] (nn) at (0,-4.4) {\nt{15 networks}{3 seeds $\times$ 5 folds\\mirror averaging}};
+\node[ctrl=6.0cm] (bk) at (\dx,-4.4) {\nt{Back to your grid}{undo the turn\\upsample 0.5\,m grids}};
+\node[data=6.0cm] (out) at (2*\dx,-4.4) {\nt{Output}{$U/u_*$ map and spread\\NaN on buildings}};
+\draw[wire] (in) -- node[lab, above] {1\,m grid} (fr);
+\draw[wire] (fr) -- node[lab, above] {5 channels} (ch);
+\draw[wire] (ch.south) -- ++(0,-1.0) -| node[lab, pos=0.25, above] {whole domain, one pass} (nn.north);
+\draw[wire] (nn) -- node[lab, above] {mean, spread} (bk);
+\draw[wire] (bk) -- node[lab, above] {.npz, .png} (out);
+\end{tikzpicture}
+\end{document}

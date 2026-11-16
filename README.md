@@ -1,13 +1,14 @@
-# Urban Microclimate Modelling
+<p align="center"><img src="reports/figures/banner.jpg" width="100%" alt="Urban Microclimate Modelling: neural surrogates of large-eddy simulation for pedestrian-level wind in unseen cities"></p>
 
 [![CI](https://img.shields.io/github/actions/workflow/status/mahir-m01/Urban-Microclimate-Modelling/ci.yml?branch=main&label=CI&logo=githubactions&logoColor=white&labelColor=24292f&style=flat-square)](https://github.com/mahir-m01/Urban-Microclimate-Modelling/actions/workflows/ci.yml)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-3776ab?logo=python&logoColor=white&labelColor=24292f&style=flat-square)](https://www.python.org/)
 [![uv](https://img.shields.io/badge/env-uv-6340ac?logo=uv&logoColor=white&labelColor=24292f&style=flat-square)](https://github.com/astral-sh/uv)
 [![Ruff](https://img.shields.io/badge/lint-ruff-c2410c?logo=ruff&logoColor=white&labelColor=24292f&style=flat-square)](https://github.com/astral-sh/ruff)
+[![PyTorch](https://img.shields.io/badge/dl-PyTorch-ee4c2c?logo=pytorch&logoColor=white&labelColor=24292f&style=flat-square)](https://pytorch.org/)
 [![Data: UrbanTALES](https://img.shields.io/badge/data-UrbanTALES-2a78d6?labelColor=24292f&style=flat-square)](https://urbantales.vercel.app)
 [![Licence: CC BY-NC 4.0](https://img.shields.io/badge/licence-CC%20BY--NC%204.0-57606a?labelColor=24292f&style=flat-square)](https://creativecommons.org/licenses/by-nc/4.0/)
 ![Phase 1: machine learning](https://img.shields.io/badge/phase%201-machine%20learning-1a7f5a?labelColor=24292f&style=flat-square)
-![Phase 2: deep learning](https://img.shields.io/badge/phase%202-deep%20learning-6340ac?labelColor=24292f&style=flat-square)
+![Phase 2: deep learning](https://img.shields.io/badge/phase%202-deep%20learning-bf3989?labelColor=24292f&style=flat-square)
 
 Surrogate models for pedestrian-level urban wind, trained on 538 large-eddy simulations of idealized building arrays and real neighbourhoods in 22 countries, and tested on cities they have never seen.
 
@@ -70,7 +71,7 @@ The data is distributed by its authors under CC BY-NC 4.0. The simulation fields
 
 ## Pipeline
 
-<p align="center"><img src="reports/figures/pipeline_overview.png" width="900" alt="System architecture: loader and audit, Phase 1 feature models, Phase 2 periodic U-Net, hybrids and uncertainty, grouped evaluator and frozen test"></p>
+<p align="center"><img src="reports/figures/architecture.png" width="100%" alt="System architecture: UrbanTALES, loader and audit, grouped splits, Phase 1 features and models, Phase 2 cache and periodic U-Net, hybrids, uncertainty, grouped evaluator and frozen test set"></p>
 <p align="center"><sub>One loader applies every data correction for both phases. Features never read a simulated field, all training and model selection use grouped folds of the development cases, and the frozen test groups enter only the final scoring.</sub></p>
 
 | Stage | Phase | What it does |
@@ -161,8 +162,7 @@ The full write-up is the [Phase 2 report](reports/Phase2_Report.pdf). Every netw
 <p align="center"><img src="reports/figures/phase2_inputs.png" width="860" alt="Input representation of one case"></p>
 <p align="center"><sub>One development case (Adelaide): the raster as released, the same case turned into the wind-aligned frame, the periodic distance to the nearest wall, and the target with one 256 m training patch.</sub></p>
 
-<p align="center"><img src="reports/figures/phase2_unet.png" width="560" alt="Architecture of the periodic U-Net"></p>
-<p align="center"><sub>The periodic U-Net: convolution blocks labelled with their channel count, for an H x W input. Every layer that reads neighbouring cells wraps across the domain edges.</sub></p>
+<p align="center"><img src="reports/figures/phase2_unet.png" width="600" alt="Architecture of the periodic U-Net"></p>
 
 ### Development results
 
@@ -214,6 +214,8 @@ The final model is scored once on the 53 cases of the 24 frozen test groups, aft
 ## Using the trained model
 
 The final Phase 2 model is the periodic U-Net of `pipeline/S13_hybrid/configs/unet_tuned_e200.yaml`, trained for 200 epochs with three seeds on each of the five development folds. `urbanwind.dl.predict` runs it on any building layout. It needs only the building heights and the wind direction, never a simulation.
+
+<p align="center"><img src="reports/figures/predict_flow.png" width="820" alt="How a prediction is made: layout, wind-aligned frame, input channels, 15 networks, back to the input grid, output"></p>
 
 ### 1. Get the weights
 

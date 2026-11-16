@@ -1,0 +1,30 @@
+\usepackage[T1]{fontenc}
+\usepackage[scaled=1.0]{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{amsmath}
+\usepackage{sansmath}
+\sansmath
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit,backgrounds}
+\definecolor{cblue}{HTML}{CFE2F8}
+\definecolor{cpeach}{HTML}{F9DDD2}
+\definecolor{cmint}{HTML}{D3EFE1}
+\definecolor{cgrey}{HTML}{ECEBE7}
+\definecolor{cline}{HTML}{6B6B6B}
+\definecolor{clabel}{HTML}{555555}
+\tikzset{
+  blk/.style={draw=cline, line width=1.1pt, rounded corners=6pt, align=center, inner sep=6pt, minimum height=2.1cm, text width=#1},
+  blk/.default=5.0cm,
+  data/.style={blk=#1, fill=cgrey}, data/.default=5.0cm,
+  ctrl/.style={blk=#1, fill=cblue}, ctrl/.default=5.0cm,
+  path/.style={blk=#1, fill=cpeach}, path/.default=5.0cm,
+  ana/.style={blk=#1, fill=cmint}, ana/.default=5.0cm,
+  wire/.style={-{Stealth[length=9pt,width=7pt]}, draw=cline, line width=1.1pt},
+  dwire/.style={wire, dashed},
+  lab/.style={font=\normalsize, text=clabel},
+  lane/.style={font=\large\bfseries, text=clabel},
+}
+\newcommand{\nt}[2]{{\LARGE #1}\\[3pt]{\Large #2}}
