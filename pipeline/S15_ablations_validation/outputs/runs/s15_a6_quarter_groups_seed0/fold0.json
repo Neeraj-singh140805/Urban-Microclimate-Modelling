@@ -1,0 +1,44 @@
+{
+  "epochs_run": 71,
+  "best_epoch": 40,
+  "best_val": 0.7323738659421603,
+  "val_metric": "rmse",
+  "minutes": 46.0,
+  "n_fit": 95,
+  "n_val": 9,
+  "steps_per_epoch": 70,
+  "device": "cuda",
+  "fold": 0,
+  "seed": 0,
+  "config_hash": "4657400928be",
+  "train_code": {
+    "git_sha": "4f8ff12",
+    "git_dirty": false
+  },
+  "predict_minutes": 0.3,
+  "inner_val_cases": [
+    "FI-Torni",
+    "US-Los-U1_d00",
+    "US-Los-U1_d90",
+    "US16_d00",
+    "US16_d45",
+    "VA53-SM-28_d00",
+    "VA53-SM-28_d45",
+    "VS35-SM-56_d00",
+    "VS35-SM-56_d45"
+  ],
+  "inner_val_by_subset": {
+    "idealized": 6,
+    "realistic": 3
+  },
+  "n_scored": 97,
+  "mirror_tta": true,
+  "native_upsample": "bilinear",
+  "infer_window": 0,
+  "infer_border": 64,
+  "infer_margin": 128,
+  "predict_code": {
+    "git_sha": "4f8ff12",
+    "git_dirty": true
+  }
+}

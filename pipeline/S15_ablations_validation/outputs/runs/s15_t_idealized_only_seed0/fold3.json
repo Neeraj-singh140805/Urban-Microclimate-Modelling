@@ -1,0 +1,56 @@
+{
+  "epochs_run": 100,
+  "best_epoch": 72,
+  "best_val": 0.22308079999956218,
+  "val_metric": "rmse",
+  "minutes": 63.5,
+  "n_fit": 124,
+  "n_val": 22,
+  "steps_per_epoch": 70,
+  "device": "cuda",
+  "fold": 3,
+  "seed": 0,
+  "config_hash": "9e86a84fdcad",
+  "train_code": {
+    "git_sha": "4f8ff12",
+    "git_dirty": false
+  },
+  "predict_minutes": 0.4,
+  "inner_val_cases": [
+    "US0625_d00",
+    "US0625_d45",
+    "VA0625-HR-28_d00",
+    "VA0625-HR-28_d45",
+    "VA0625-HR-56_d00",
+    "VA0625-HR-56_d45",
+    "VA16-SM-28_d00",
+    "VA16-SM-28_d45",
+    "VA16-SM-56_d00",
+    "VA16-SM-56_d45",
+    "VA25-HR-28_d00",
+    "VA25-HR-28_d45",
+    "VS1111-HR-28_d00",
+    "VS1111-HR-28_d45",
+    "VS1111-HR-56_d00",
+    "VS1111-HR-56_d45",
+    "VS1111-SM-56_d00",
+    "VS1111-SM-56_d45",
+    "VS25-CL-28_d00",
+    "VS25-CL-28_d45",
+    "VS25-CL-56_d00",
+    "VS25-CL-56_d45"
+  ],
+  "inner_val_by_subset": {
+    "idealized": 22
+  },
+  "n_scored": 96,
+  "mirror_tta": true,
+  "native_upsample": "bilinear",
+  "infer_window": 0,
+  "infer_border": 64,
+  "infer_margin": 128,
+  "predict_code": {
+    "git_sha": "0e65759",
+    "git_dirty": false
+  }
+}

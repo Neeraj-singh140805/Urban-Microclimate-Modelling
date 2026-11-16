@@ -1,0 +1,58 @@
+{
+  "epochs_run": 100,
+  "best_epoch": 98,
+  "best_val": 0.2854051801065604,
+  "val_metric": "rmse",
+  "minutes": 65.6,
+  "n_fit": 128,
+  "n_val": 24,
+  "steps_per_epoch": 70,
+  "device": "cuda",
+  "fold": 0,
+  "seed": 0,
+  "config_hash": "9e86a84fdcad",
+  "train_code": {
+    "git_sha": "4f8ff12",
+    "git_dirty": false
+  },
+  "predict_minutes": 0.3,
+  "inner_val_cases": [
+    "UA35_d00",
+    "UA35_d45",
+    "UA4444_d00",
+    "UA4444_d45",
+    "UA53_d00",
+    "UA53_d45",
+    "US0625_d00",
+    "US0625_d45",
+    "US16_d00",
+    "US16_d45",
+    "US4444_d00",
+    "US4444_d45",
+    "VA4444-HR-56_d00",
+    "VA4444-HR-56_d45",
+    "VS1111-CL-28_d00",
+    "VS1111-CL-28_d45",
+    "VS16-HR-28_d00",
+    "VS16-HR-28_d45",
+    "VS16-HR-56_d00",
+    "VS16-HR-56_d45",
+    "VS4444-HR-28_d00",
+    "VS4444-HR-28_d45",
+    "VS4444-HR-56_d00",
+    "VS4444-HR-56_d45"
+  ],
+  "inner_val_by_subset": {
+    "idealized": 24
+  },
+  "n_scored": 97,
+  "mirror_tta": true,
+  "native_upsample": "bilinear",
+  "infer_window": 0,
+  "infer_border": 64,
+  "infer_margin": 128,
+  "predict_code": {
+    "git_sha": "4f8ff12",
+    "git_dirty": true
+  }
+}
