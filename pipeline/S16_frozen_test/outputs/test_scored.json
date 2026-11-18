@@ -1,0 +1,19 @@
+{
+ "date": "2026-11-18T06:56:17+00:00",
+ "git_sha": "8d6c45f",
+ "status": "scored",
+ "n_test_cases": 53,
+ "n_networks": 15,
+ "config": "pipeline/S13_hybrid/configs/unet_tuned_e200.yaml",
+ "reason": "write the output tables with six decimals so the report's three-decimal values are not rounded twice; same 15 networks, same predictions, no modelling choice changed",
+ "history": [
+  {
+   "date": "2026-11-18T06:49:43+00:00",
+   "git_sha": "8d6c45f",
+   "status": "scored",
+   "n_test_cases": 53,
+   "n_networks": 15,
+   "config": "pipeline/S13_hybrid/configs/unet_tuned_e200.yaml"
+  }
+ ]
+}

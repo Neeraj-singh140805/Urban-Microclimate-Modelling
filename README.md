@@ -39,6 +39,7 @@ Out-of-fold scores on the 482 development cases. Each case is predicted by model
 - The mean wind of a neighbourhood is predicted from 34 features by LightGBM with $R^2$ = 0.876 (Phase 1).
 - The final U-Net is more accurate than the Phase 1 wind map in 97.5% of cases and in all five folds.
 - Its 90% intervals, calibrated on held-out cities, cover 0.899 of cells.
+- On the 53 frozen test cases, scored once, it reaches a pooled $R^2$ of 0.840 and a median per-case $R^2$ of 0.655, against 0.680 and 0.351 for the Phase 1 pixel model, with the higher per-case $R^2$ in all 53 cases.
 
 <p align="center"><img src="reports/figures/phase2_wind_maps.png" width="860" alt="Simulated wind, Phase 1 pixel model, final U-Net and the U-Net error for three held-out cases"></p>
 <p align="center"><sub>Held-out cases ranked by the U-Net's per-case R²: the median idealized case, the median realistic case and a lower-quartile realistic case. Columns: the simulation, the Phase 1 pixel model, the final U-Net, and the U-Net error (blue too slow, red too fast).</sub></p>
@@ -91,7 +92,7 @@ The data is distributed by its authors under CC BY-NC 4.0. The simulation fields
 | [S13](pipeline/S13_hybrid) | 2 | Error analysis, hybrids with the Phase 1 models, a ConvNeXt U-Net, and the final 200-epoch three-seed model |
 | [S14](pipeline/S14_dl_uncertainty) | 2 | Deep ensemble and MC dropout uncertainty, split-conformal intervals calibrated on held-out groups |
 | [S15](pipeline/S15_ablations_validation) | 2 | One-at-a-time ablations of the network and its inference time |
-| S16 | 2 | Phase 2 scoring of the frozen test set, run once after every choice is fixed |
+| [S16](pipeline/S16_frozen_test) | 2 | Phase 2 scoring of the frozen test set, run once after every choice is fixed |
 
 ## Phase 1 results
 
@@ -209,7 +210,16 @@ Letting neighbourhoods of a test city into training (a random case split, as in 
 
 ### Frozen test set
 
-The final model is scored once on the 53 cases of the 24 frozen test groups, after every choice has been fixed on the development folds; the result will be reported here and in the Phase 2 report.
+After every choice was fixed on the development folds, the final model was scored once, on 18 November 2026, on the 53 cases of the 24 frozen test groups (34 idealized, 19 realistic). Its 15 networks (three seeds on each of the five development folds) never saw a test case, so their predictions are averaged cell by cell, from the building raster and the wind direction only. The result tables were written a second time the same day with more decimals; the networks and predictions were unchanged, and `pipeline/S16_frozen_test/outputs/test_scored.json` records both runs and the reason. Details are in [`pipeline/S16_frozen_test`](pipeline/S16_frozen_test).
+
+| Wind map at every open cell | Pooled $R^2$ (idealized / realistic) | Median per-case $R^2$ | MAE ($u_*$) | $\Delta P_{95}$ ($u_*$) |
+| --- | --- | --- | --- | --- |
+| Phase 1: pixel-level LightGBM | 0.680 (0.893 / 0.617) | 0.351 | 0.530 | -0.651 |
+| **Phase 2: final U-Net** | **0.840 (0.960 / 0.805)** | **0.655** | **0.362** | **-0.353** |
+
+- The U-Net has the higher per-case $R^2$ in all 53 test cases.
+- Both models score higher than in development (0.734 and 0.591), partly because the test set is 64% idealized against 39% in development.
+- Without the two test cases from cities that also have development neighbourhoods, the U-Net's pooled $R^2$ is 0.795.
 
 ## Using the trained model
 
@@ -345,7 +355,8 @@ Urban-Microclimate-Modelling/
 │   ├── S12_architecture_search/    alternative architectures and the loss library
 │   ├── S13_hybrid/                 error analysis, hybrids and the final model
 │   ├── S14_dl_uncertainty/         ensemble and MC dropout uncertainty, conformal intervals
-│   └── S15_ablations_validation/   one-at-a-time ablations and inference time
+│   ├── S15_ablations_validation/   one-at-a-time ablations and inference time
+│   └── S16_frozen_test/            Phase 2 scoring of the frozen test set
 ├── reports/                        reports, slides and the combined paper (PDF), README figures, key references
 ├── results/                        experiment log (runs.csv; runs_v1.csv is the log before the metric columns were corrected); predictions and weights are not tracked
 ├── .github/workflows/              lint and tests on every pull request
