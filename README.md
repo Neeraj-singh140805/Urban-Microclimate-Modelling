@@ -225,6 +225,8 @@ After every choice was fixed on the development folds, the final model was score
 
 The final Phase 2 model is the periodic U-Net of `pipeline/S13_hybrid/configs/unet_tuned_e200.yaml`, trained for 200 epochs with three seeds on each of the five development folds. `urbanwind.dl.predict` runs it on any building layout. It needs only the building heights and the wind direction, never a simulation.
 
+To see it run, open [`demo/Phase2_Demo.ipynb`](demo/Phase2_Demo.ipynb): it predicts real neighbourhoods the model has never seen next to their simulations, the same neighbourhood with another wind direction, and a new layout with its uncertainty map, and summarises every setting of the model.
+
 <p align="center"><img src="reports/figures/predict_flow.png" width="820" alt="How a prediction is made: layout, wind-aligned frame, input channels, 15 networks, back to the input grid, output"></p>
 
 ### 1. Get the weights
@@ -340,6 +342,7 @@ uv run python pipeline/S16_frozen_test/s16_score.py                # frozen test
 ```text
 Urban-Microclimate-Modelling/
 ├── data/                           case catalog, metadata, name map, frozen splits
+├── demo/                           Phase 2 demo: the trained U-Net on real and new layouts
 ├── src/urbanwind/                  shared package: loader, metrics, evaluator, splits, features
 │   └── dl/                         deep learning: cache, patches, networks, losses, trainer, uncertainty, predict
 ├── pipeline/
