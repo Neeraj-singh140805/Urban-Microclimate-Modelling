@@ -1,0 +1,5 @@
+variant,cases,n_cases,pooled_r2,median_within_case_r2,mean_mae,mean_delta_p95,mean_level_err,mean_pattern_err
+unet_final,all,53,0.840432,0.655130,0.362000,-0.352641,0.020420,0.259942
+unet_final,idealized,34,0.960203,0.699489,0.255755,-0.220424,0.006453,0.119267
+unet_final,realistic,19,0.804647,0.619582,0.552123,-0.589241,0.045412,0.511677
+unet_final,all without shared-city cases,51,0.794729,0.655130,0.352187,-0.348595,0.020259,0.245873
