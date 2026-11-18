@@ -326,11 +326,13 @@ uv run python pipeline/S11_unet_baseline/s11_results.py             # S11 tables
 uv run python pipeline/S12_architecture_search/s12_results.py       # architecture comparison
 uv run python -m pipeline.S13_hybrid.s13_final                     # three-seed ensembles
 uv run python pipeline/S14_dl_uncertainty/run_s14_pipeline.py       # uncertainty and intervals
+uv run python -m pipeline.S15_ablations_validation.s15_results  # ablation tables, after training the S15 configs
+uv run python pipeline/S16_frozen_test/s16_score.py                # frozen test set, scored once
 ```
 
 - The splits in `data/splits.json` are frozen; do not regenerate them.
 - One fold of the 100-epoch U-Net takes about an hour on a Kaggle T4 GPU. Each training records the commit of its code and a hash of its settings, and refuses to resume with changed settings.
-- The evaluator rejects predictions for test cases outside the final scoring, and the Phase 1 test-scoring script (S09) refuses a second run unless the reason is recorded.
+- The evaluator rejects predictions for test cases outside the final scoring, and the test-scoring scripts of both phases (S09, S16) refuse a second run unless the reason is recorded.
 - Each stage README lists its inputs, outputs, results and the exact commands.
 
 ## Repository structure

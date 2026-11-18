@@ -1,6 +1,6 @@
 # Key references
 
-The papers the Phase 1 report builds on, grouped by topic, with what this project takes from each. Full citations are in the reference list of [`Phase1_Report.pdf`](Phase1_Report.pdf). Most of these papers are published under their publishers' copyright, so they are linked rather than included here.
+The papers the two phases build on, grouped by topic, with what this project takes from each. Full citations are in the reference lists of [`Phase1_Report.pdf`](Phase1_Report.pdf), [`Phase2_Report.pdf`](Phase2_Report.pdf) and [`Combined_Phase1_Phase2_Paper.pdf`](Combined_Phase1_Phase2_Paper.pdf). Most of these papers are published under their publishers' copyright, so they are linked rather than included here.
 
 ## Dataset and simulation
 
@@ -64,10 +64,35 @@ The papers the Phase 1 report builds on, grouped by topic, with what this projec
 | Varma and Simon (2006), *BMC Bioinformatics* 7, 91; Cawley and Talbot (2010), *J. Mach. Learn. Res.* 11, 2079–2107 | Selection bias from tuning on the scoring folds, the reason for nested cross-validation. |
 | Kaufman et al. (2012), *ACM Trans. Knowl. Discov. Data* 6, 15 | Forms of leakage, the reason features never read simulated fields. |
 
-## Planned for Phase 2
+## Phase 2: networks, training and uncertainty
 
 | Paper | What we use |
 | --- | --- |
-| Ronneberger et al. (2015), MICCAI, LNCS 9351, 234–241 | The U-Net architecture. |
-| Perez et al. (2018), AAAI | FiLM conditioning of a network on the physics features. |
-| Goodfellow et al. (2014), *NeurIPS* 27, 2672–2680 | Generative adversarial networks, used by refinement models. |
+| Ronneberger et al. (2015), MICCAI, LNCS 9351, 234–241 | The U-Net architecture of the final model. |
+| He et al. (2016), CVPR, 770–778 | Residual blocks, used by the residual U-Net of S12. |
+| Oktay et al. (2018), [arXiv:1804.03999](https://arxiv.org/abs/1804.03999) | Attention gates on the skip connections, used by the attention U-Net of S12. |
+| Liu et al. (2022), CVPR, 11976–11986 | ConvNeXt blocks, used by the ConvNeXt U-Net of S13. |
+| Li et al. (2021), ICLR | The Fourier neural operator compared in S12. |
+| Wu and He (2018), ECCV, 3–19 | Group normalisation in every convolution block. |
+| He et al. (2015), ICCV, 1026–1034 | He initialisation of the convolution weights. |
+| Tompson et al. (2015), CVPR, 648–656 | Spatial dropout, also kept on at prediction time for MC dropout. |
+| Loshchilov and Hutter (2019), ICLR; Loshchilov and Hutter (2017), ICLR | AdamW and the cosine learning-rate schedule. |
+| Akiba et al. (2019), KDD, 2623–2631; Bergstra et al. (2011), NeurIPS 24 | Optuna and the tree-structured Parzen estimator for the tuning study. |
+| Goodfellow et al. (2014), *NeurIPS* 27, 2672–2680; Isola et al. (2017), CVPR, 1125–1134 | Conditional adversarial networks, used by refinement models in earlier work. |
+| Perez et al. (2018), AAAI | FiLM conditioning of a network on side information, considered for the hybrid. |
+| Wolpert (1992), *Neural Networks* 5, 241–259 | Stacked generalisation, the residual-stacking hybrid of S13. |
+| Lakshminarayanan et al. (2017), NeurIPS 30 | Deep ensembles for the uncertainty of S14. |
+| Gal and Ghahramani (2016), ICML, 1050–1059 | MC dropout for the uncertainty of S14. |
+| Angelopoulos and Bates (2023), *Found. Trends Mach. Learn.* 16, 494–591; Lei et al. (2018), *J. Amer. Statist. Assoc.* 113, 1094–1111 | Split conformal intervals and the spread-normalised score of S14. |
+
+## Phase 2: networks on UrbanTALES compared
+
+The protocols differ, so the scores order the evidence rather than rank the models: a random case split lets neighbourhoods of a test city into training and scores higher than a split by city.
+
+| Study | Data and split | Metric | Reported score |
+| --- | --- | --- | --- |
+| Lu et al. (2025) | 512 cases, random 80/20 case split | $R^2$ | about 0.94 (idealized), 0.65 (all) |
+| Snaiki et al. (2026) | random case split | peak-speed refinement of a U-Net | not quoted here: a random split |
+| Huang et al. (2026) | two held-out realistic cases | $R^2$ | 0.66 and 0.69 |
+| Zhang and Yu (2026), *Buildings* 16, 4233. [doi:10.3390/buildings16214233](https://doi.org/10.3390/buildings16214233) | 81 geometry-held-out cases | MAE of wind speed | 0.1275 m/s; beats an FNO on 51.1% of 47 realistic cases |
+| This work, Phase 2 | 482 cases in grouped 5-fold by city and layout family; a 53-case frozen test set | pooled $R^2$ | 0.734 (development folds), 0.840 (frozen test) |
